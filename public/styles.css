@@ -1,0 +1,50 @@
+table {
+	border: 1px solid black;
+	/*background-color:yellow; 
+	border-style:solid; */
+}
+
+th,td {
+	/*border-style:solid; */
+	border: 1px solid black;
+}
+
+table>tbody>tr>th {
+	font-style: italic;
+	font-weight: normal;
+}
+
+table>tbody>tr:nth-child(odd){
+	background-color: lime;
+}
+
+table>tbody>tr:nth-child(even){
+	background-color: yellow;
+}
+
+table>tbody>tr>td.deleteCell {
+	border: 1px solid lime;
+}
+
+table>tfoot {
+/*	background-color:cyan; */
+}
+table>tfoot>tr>td {
+	border: 1px solid black;
+}
+
+/*
+div.outer-content {
+	background-color: pink;
+	margin-top:20px;
+	padding: 10px 0px;
+	width: 75%;
+}
+
+div.outer-content>div.inner-content {
+	background-color: cornflowerblue;
+	left: 12.5%;
+	position: relative;
+	text-align: center;
+	width: 75%;
+}*/

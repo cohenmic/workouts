@@ -1,0 +1,170 @@
+<h1>page with submit button</h1>
+<button id="show">Show Database</button>
+<form id="addForm">
+	<fieldset>
+		<legend>Add New Workout:</legend>
+		<label>Enter Name:
+			<input type="text" name="name" size="20" maxlength="20">
+		</label>
+		<label>Number of Reps:
+			<input type="text" name="reps" size="3" maxlength="3">
+		</label>
+		<label>Weight:
+			<input type="text" name="weight" size="3" maxlength="3">
+		</label>
+		<label>Date:
+			<input type="text" name="date" size="10" maxlength="10">
+		</label>
+		<label>Pounds or Kilos? 1 for Pounds 0 for Kilos
+			<input type="text" name="lbs" size="1" maxlength="1">
+		</label>
+		<button type="submit">Submit</button>
+	</fieldset>
+</form>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', showTable);
+
+document.getElementById("addForm").addEventListener("submit", function(e) {
+	var form = document.getElementById("addForm");
+	var req = new XMLHttpRequest();
+	var name = form.elements.name.value;
+	var reps = form.elements.reps.value;
+	var weight = form.elements.weight.value;
+	var date = form.elements.date.value;
+	var lbs = form.elements.lbs.value;
+	var url ="/insert?name="+name+"&reps="+reps+"&weight="+weight+"&date="+date+"&lbs="+lbs;
+	req.open('GET',url,true);
+	req.addEventListener('load',function(){
+		if(req.status>=200 && req.status<400){
+			var json = JSON.parse(req.responseText);
+			if (json.length >=1){
+				var myTable = document.getElementById("mainTable");
+				addToTable(json[0],myTable);
+			}
+		}
+	});
+	req.send(null);
+	e.preventDefault();
+});
+
+function addToTable(objectIn, myTable){
+	var tbody = myTable.querySelector('tbody');
+	makeRow(tbody,objectIn);
+}
+
+document.getElementById("show").addEventListener("click",function(){
+	var req = new XMLHttpRequest();
+	var url ="/show";
+	req.open('GET',url,true);
+	req.addEventListener('load',function(){
+		if(req.status>=200 && req.status<400){
+			var json = JSON.parse(req.responseText);
+			if (json.length >=1)
+				makeTable(json, "mainTable");		
+		}
+	});
+	req.send(null);
+});
+
+function showTable(){
+	var req = new XMLHttpRequest();
+	var url ="/show";
+	req.open('GET',url,true);
+	req.addEventListener('load',function(){
+		if(req.status>=200 && req.status<400){
+			var json = JSON.parse(req.responseText);
+			if (json.length >=1)
+				makeTable(json,"mainTable");		
+		}
+	});
+	req.send(null);
+}
+
+function makeRow(tbody, objectIn){
+	var newRow = document.createElement('tr');
+	//newRow.setAttribute("id","row_"+objectIn.id);
+	for (var key in objectIn){
+		var newCell = document.createElement('td');
+		newCell.textContent = objectIn[key];
+		newRow.appendChild(newCell);
+	}
+	var deleteCell = makeDeleteCell(objectIn.id, newRow, tbody);
+	newRow.appendChild(deleteCell);
+	var editCell = makeEditCell(objectIn, newRow, tbody);
+	newRow.appendChild(editCell);
+	tbody.appendChild(newRow);
+}
+
+
+function makeTable(json, id){
+	console.log("making table");
+	var keys = [];
+	for (key in json[0])
+		keys.push(key);
+	var myTable = document.createElement('table');
+	var head = document.createElement('thead');
+	var newRow = document.createElement('tr');
+	for (var i=0;i<keys.length;i++){
+		var cell = document.createElement('th');
+		cell.textContent = keys[i];
+		newRow.appendChild(cell);
+	}
+	head.appendChild(newRow);
+	myTable.appendChild(head);
+	var tbody = document.createElement('tbody');
+
+	for (var i=0;i<json.length;i++)
+		makeRow(tbody,json[i]);
+	myTable.appendChild(tbody);
+	myTable.setAttribute("id",id);
+	document.body.appendChild(myTable);
+}
+
+function makeDeleteCell(id, row, tbody){
+	var deleteCell = document.createElement('td');
+	deleteCell.className += "deleteCell";
+	var deleteButton = document.createElement('button');
+	deleteButton.setAttribute("data-deleteId",id);
+	deleteButton.textContent = "delete";
+	deleteButton.addEventListener("click", function(e){
+		tbody.removeChild(row);
+		var req = new XMLHttpRequest();
+		//var url ="/delete?id="+e.target.getAttribute("data-deleteId");
+		var url ="/delete?id="+id;
+		req.open('GET',url,true);
+		req.addEventListener('load',function(){
+			if(req.status>=200 && req.status<400){
+				console.log(req.responseText);
+			}
+		});
+		req.send(null);
+	});
+	deleteCell.appendChild(deleteButton);
+	return deleteCell;
+}
+
+function makeEditCell(objectIn, row, tbody){
+	var editCell = document.createElement('td');
+	var editButton = document.createElement('button');
+/*	var name = objectIn.name;
+	var reps = objectIn.reps;
+	var weight = objectIn.weight;
+	var date = objectIn.date;
+	var lbs = objectIn.lbs; */
+	var id = objectIn.id;
+	//editButton.setAttribute("data-editId", objectIn.id);
+	editButton.textContent = "edit";
+	editButton.addEventListener("click", function(e){
+	//	window.location.href = '/edit?id='+id+'&name='+name+'&reps='+reps+'&weight='+weight+'&date='+date+'&lbs='+lbs;
+		window.location.href = '/edit?id='+id;
+	});
+	editCell.appendChild(editButton);
+	return editCell;
+}
+
+	
+</script>
+		
+

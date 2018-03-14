@@ -1,0 +1,28 @@
+<h2>Edit page</h2>
+<form id="editForm" method="post" action="/update">
+	<fieldset>
+		<legend>Edit Form</legend>
+		<label>Name:
+			<input type="text" name="name" value="{{name}}" maxlength="20">
+		</label>
+		<label>Reps:
+			<input type="text" name="reps" value="{{reps}}" size="3" maxlength="3">
+		</label>
+		<label>Weight:
+			<input type="text" name="weight" value="{{weight}}" size="3" maxlength="3">
+		</label>
+		<label>Date:
+			<input type="text" name="date" value="{{date}}" size="10" maxlength="10">
+		</label>
+		<label>Pounds (1) or Kilos (0)?
+			<input type="text" name="lbs" value="{{lbs}}" size="1" maxlength="1">
+		</label>
+
+		<input type="hidden" name="id" value="{{id}}">
+		
+		<button type="submit">Submit</button>
+	</fieldset>
+</form>
+
+	
+

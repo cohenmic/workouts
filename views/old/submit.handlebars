@@ -1,0 +1,17 @@
+<h1>page with submit button</h1>
+<button id="submit">Submit</button>
+
+<script>
+document.getElementById("submit").addEventListener("click", function() {
+	var req = new XMLHttpRequest();
+	req.open('GET',"",true);
+	req.addEventListener('load',function(){
+		if(req.status>=200 && req.status<400){
+			console.log("req.responseText is "+req.responseText);
+		}
+	});
+	req.send(null);
+});
+</script>
+		
+
