@@ -22,6 +22,32 @@ app.get('/', function(req,res,next){
 	res.render('home');
 });
 
+/*
+app.post('/edit', function(req,res,next){
+	var context = {};
+	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.body.id], function(err,result){
+		if(err){
+			next(err);
+			return;
+		}
+		context.results = result[0];
+		context.results['date'] = dateValidation(context.results['date'],true);
+		if (!context.results['weight'])
+			context.result['weight'] = "";
+		if (!context.results['reps'])
+			context.results['reps'] = "";
+		context.results['checkedlbs'] = "";
+		context.results['checkedkilos'] = "";
+		if (context.results['lbs'] == 1) 
+			context.results['checkedlbs'] = "checked";
+		else
+			context.results['checkedkilos'] = "checked";
+
+		res.render('edit',context.results);
+	});
+});
+*/
+
 app.get('/edit', function(req,res,next){
 	var context = {};
 	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.query.id], function(err,result){
@@ -30,8 +56,10 @@ app.get('/edit', function(req,res,next){
 			return;
 		}
 		context.results = result[0];
-		var newDate = dateFormat(context.results['date'], 'yyyy-mm-dd');
-		context.results['date'] = newDate;	
+		context.results['date'] = dateValidation(context.results['date'],true);
+		if (!context.results['weight'])
+			context.result['weight'] = "";
+		context.results['reps'] = repsValidate(context.results['reps'],true);	
 		context.results['checkedlbs'] = "";
 		context.results['checkedkilos'] = "";
 		if (context.results['lbs'] == 1) 
@@ -43,7 +71,21 @@ app.get('/edit', function(req,res,next){
 	});
 });
 
+
 app.post('/update', function(req,res,next){
+	var context = {};
+	mysql.pool.query('UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=? ',
+		[req.body['name'], req.body['reps'], req.body['weight'], req.body['date'], req.body['lbs'], req.body['id']],
+		function(err,result){
+			if(err){
+				next(err);
+				return;
+			}
+			res.render('home');
+		});
+});
+/*when form is edited */
+app.post('/', function(req,res,next){
 	var context = {};
 	mysql.pool.query('UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=? ',
 		[req.body['name'], req.body['reps'], req.body['weight'], req.body['date'], req.body['lbs'], req.body['id']],
@@ -64,44 +106,71 @@ app.get('/show', function(req,res,next){
 			next(err);
 			return;
 		}
-
 		for(var i=0;i<rows.length;i++){
 			var row=rows[i];
-			var newDate = dateFormat(row['date'], 'yyyy-mm-dd');
-			row['date'] = newDate;	
-			var lbs = row['lbs'];
-			if(lbs == 0) //calculate pounds from kg as needed
-				row['weight'] = (row['weight']*2.2).toFixed(0);
+			row['date'] = dateValidation(row['date'],false);
+			row['weight'] = poundsCalc(row['weight'],row['lbs']);
+			row['reps'] = repsValidate(row['reps'],false);
 		}  
 		context.results = JSON.stringify(rows);
 		res.send(context.results);
 	});
 });
 
+function dateValidation(dateIn, forForm){
+	if (dateIn != '0000-00-00'){
+		if(!forForm)
+			return dateFormat(dateIn, 'mm/dd/yyyy');
+		else
+			return dateFormat(dateIn, 'yyyy-mm-dd');
+	}
+	else
+		return 'undefined';
+}
+
+function poundsCalc(weightIn, unitIn){
+	if (!weightIn)
+		return 'undefined';
+	if (unitIn == 0) //if kilos, convert to pounds
+		return (weightIn*2.2).toFixed(0);
+	else
+		return weightIn;
+}
+
+function repsValidate(repsIn, forForm){
+	if (!repsIn){
+		if(forForm)
+			return "";
+		else
+			return "N/A";
+	}
+	else
+		return repsIn;
+}
+
 app.get('/insert', function(req,res,next){
 	var context = {};
-	mysql.pool.query("INSERT INTO workouts (`name`,`reps`,`weight`,`date`,`lbs`) VALUES (?,?,?,?,?)", [req.query.name, req.query.reps, req.query.weight, req.query.date, req.query.lbs], function(err, result){
-		if(err){
-			next(err);
-			return;
-		}
-		mysql.pool.query('SELECT * FROM workouts WHERE id=?', result.insertId, function(err, rows, fields){
+	if(req.query.name){
+		mysql.pool.query("INSERT INTO workouts (`name`,`reps`,`weight`,`date`,`lbs`) VALUES (?,?,?,?,?)", [req.query.name, req.query.reps, req.query.weight, req.query.date, req.query.lbs], function(err, result){
 			if(err){
 				next(err);
 				return;
 			}
-			var row=rows[0];
-			var newDate = dateFormat(row['date'], 'yyyy-mm-dd');
-			row['date'] = newDate;	
-			var lbs = row['lbs'];
-			if(lbs == 0) //calculate pounds from kg as needed
-				row['weight'] = (row['weight']*2.2).toFixed(0);
+			mysql.pool.query('SELECT * FROM workouts WHERE id=?', result.insertId, function(err, rows, fields){
+				if(err){
+					next(err);
+					return;
+				}
+				var row=rows[0];
+				row['date'] = dateValidation(row['date'],false);
+				row['weight'] = poundsCalc(row['weight'],row['lbs']);
+				row['reps'] = repsValidate(row['reps'],false);
 			
-			context.results = JSON.stringify(rows);
-			res.send(context.results);
+				context.results = JSON.stringify(rows);
+				res.send(context.results);
+			});
 		});
-
-	});
+	}
 });
 
 app.get('/delete', function(req,res,next){
