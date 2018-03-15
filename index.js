@@ -73,6 +73,13 @@ app.get('/show', function(req,res,next){
 			next(err);
 			return;
 		}
+		/* to try to format dates */
+		for (var i = 0; i < rows.length; i++) {
+    	var row = rows[i];
+			row.date = dateformat(row['date'], '%Y/%m/%d');
+			// dont think you need to do rows[i] = row; 
+		}
+		/* end of date crap */
 		context.results = JSON.stringify(rows);
 		res.send(context.results);
 	});
