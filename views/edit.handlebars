@@ -1,7 +1,7 @@
 <h2>Edit page</h2>
 <form id="editForm" method="post" action="/update">
 	<fieldset>
-		<legend>Edit Form</legend>
+		<legend>Edit Workout:</legend>
 		<label>Name:
 			<input type="text" name="name" value="{{name}}" maxlength="20">
 		</label>
@@ -14,15 +14,22 @@
 		<label>Date:
 			<input type="text" name="date" value="{{date}}" size="10" maxlength="10">
 		</label>
-		<label>Pounds (1) or Kilos (0)?
-			<input type="text" name="lbs" value="{{lbs}}" size="1" maxlength="1">
-		</label>
+		<p>Weight unit:
+			<label>pounds
+				<input type="radio" name="lbs" value="1" {{checkedlbs}}/>
+			</label>
+			<label>kilograms
+				<input type="radio" name="lbs" value="0" {{checkedkilos}}/>
+			</label>
+		</p>
 
 		<input type="hidden" name="id" value="{{id}}">
 		
 		<button type="submit">Submit</button>
 	</fieldset>
 </form>
+
+
 
 	
 

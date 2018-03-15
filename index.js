@@ -6,6 +6,7 @@ var app = express();
 var handlebars = require('express-handlebars').create({defaultLayout:'main'});
 var session = require('express-session');
 var bodyParser = require('body-parser');
+var dateFormat = require('dateformat');
 
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(session({secret:'mySecret'}));
@@ -23,29 +24,23 @@ app.get('/', function(req,res,next){
 
 app.get('/edit', function(req,res,next){
 	var context = {};
-	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.query.id], function(err, result){
+	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.query.id], function(err,result){
 		if(err){
 			next(err);
 			return;
 		}
 		context.results = result[0];
+		var newDate = dateFormat(context.results['date'], 'yyyy-mm-dd');
+		context.results['date'] = newDate;	
+		context.results['checkedlbs'] = "";
+		context.results['checkedkilos'] = "";
+		if (context.results['lbs'] == 1) 
+			context.results['checkedlbs'] = "checked";
+		else
+			context.results['checkedkilos'] = "checked";
+
 		res.render('edit',context.results);
 	});
-});
-
-app.get('/update', function(req,res,next){
-	console.log("not sure this should happen");
-/*
-	var context = {};
-	mysql.pool.query('UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=? ',
-		[req.query.name, req.query.reps, req.query.weight, req.query.date, req.query.lbs, req.query.id],
-		function(err,result){
-			if(err){
-				next(err);
-				return;
-			}
-			res.render('home');
-		}); */
 });
 
 app.post('/update', function(req,res,next){
@@ -61,10 +56,6 @@ app.post('/update', function(req,res,next){
 		});
 });
 	
-//	for (var field in req.body){
-//		console.log("field is "+field+" and value is "+req.body[field]);
-//	}
-	
 app.get('/show', function(req,res,next){
 	var context = {};
 	mysql.pool.query('SELECT * FROM workouts', function(err, rows, fields){
@@ -73,13 +64,15 @@ app.get('/show', function(req,res,next){
 			next(err);
 			return;
 		}
-		/* to try to format dates */
-		for (var i = 0; i < rows.length; i++) {
-    	var row = rows[i];
-			row.date = dateformat(row['date'], '%Y/%m/%d');
-			// dont think you need to do rows[i] = row; 
-		}
-		/* end of date crap */
+
+		for(var i=0;i<rows.length;i++){
+			var row=rows[i];
+			var newDate = dateFormat(row['date'], 'yyyy-mm-dd');
+			row['date'] = newDate;	
+			var lbs = row['lbs'];
+			if(lbs == 0) //calculate pounds from kg as needed
+				row['weight'] = (row['weight']*2.2).toFixed(0);
+		}  
 		context.results = JSON.stringify(rows);
 		res.send(context.results);
 	});
@@ -97,6 +90,13 @@ app.get('/insert', function(req,res,next){
 				next(err);
 				return;
 			}
+			var row=rows[0];
+			var newDate = dateFormat(row['date'], 'yyyy-mm-dd');
+			row['date'] = newDate;	
+			var lbs = row['lbs'];
+			if(lbs == 0) //calculate pounds from kg as needed
+				row['weight'] = (row['weight']*2.2).toFixed(0);
+			
 			context.results = JSON.stringify(rows);
 			res.send(context.results);
 		});

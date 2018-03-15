@@ -14,24 +14,25 @@
 		<label>Date:
 			<input type="text" name="date" size="10" maxlength="10">
 		</label>
-			<p>Weight unit:</p>
+			<p>Weight unit:
 		<label>pounds
 			<input type="radio" name="lbs" value="1"/>
 		</label>
 		<label>kilograms
 			<input type="radio" name="lbs" value="0"/>
 		</label>
+			</p>
 		<button type="submit">Submit</button>
 	</fieldset>
 </form>
 
 <script>
 /* set these variables, then everything else should be portable */
-var tableColumns = ["name","reps","weight","date","lbs"];
+var tableColumns = ["name","reps","weight","date"];
 var tableId = "mainTable";
 
 var showTable = function(id,columns){
-	makeTable(id,columns);
+	var myTable = makeTable(id,columns);
 	var req = new XMLHttpRequest();
 	var url ="/show";
 	req.open('GET',url,true);
@@ -39,12 +40,22 @@ var showTable = function(id,columns){
 		if(req.status>=200 && req.status<400){
 			var json = JSON.parse(req.responseText);
 			if (json.length >=1)
-				fillTable(json,columns,id);		
+				fillTable(json,columns,myTable);		
 		}
 	});
 	req.send(null);
+	document.body.appendChild(myTable);
 };
-var showTableBound = showTable.bind(null,tableColumns,tableId);
+
+var showTableBound = showTable.bind(null,tableId,tableColumns);
+
+/*
+var addToTable = function(myTable, columns, objectIn){
+	var tbody = myTable.querySelector('tbody');
+	makeRow(tbody,objectIn,columns);
+} */
+var showTableBound = showTable.bind(null,tableId,tableColumns);
+//var addToTableBound = addToTable.bind(null,tableId,tableColumns);
 
 document.addEventListener('DOMContentLoaded', showTableBound);
 
@@ -63,7 +74,8 @@ document.getElementById("addForm").addEventListener("submit", function(e) {
 			var json = JSON.parse(req.responseText);
 			if (json.length >=1){
 				var myTable = document.getElementById("mainTable");
-				addToTable(json[0],myTable);
+				//addToTableBound(json[0],myTable);
+				addToTable(json[0],myTable,tableColumns);
 			}
 		}
 	});
@@ -71,9 +83,9 @@ document.getElementById("addForm").addEventListener("submit", function(e) {
 	e.preventDefault();
 });
 
-function addToTable(objectIn, myTable){
+function addToTable(objectIn, myTable, columns){
 	var tbody = myTable.querySelector('tbody');
-	makeRow(tbody,objectIn);
+	makeRow(tbody,objectIn,columns);
 }
 
 function makeRow(tbody, objectIn, columns){
@@ -90,14 +102,17 @@ function makeRow(tbody, objectIn, columns){
 	tbody.appendChild(newRow);
 }
 
-function makeTable(columns, id){
+function makeTable(id,columns){
 	console.log("making table");
 	var myTable = document.createElement('table');
 	var head = document.createElement('thead');
 	var newRow = document.createElement('tr');
 	for (var i=0;i<columns.length;i++){
 		var cell = document.createElement('th');
-		cell.textContent = columns[i];
+		if (columns[i] == "weight")
+			cell.textContent = "weight (lbs)";
+		else
+			cell.textContent = columns[i];
 		newRow.appendChild(cell);
 	}
 	head.appendChild(newRow);
@@ -105,12 +120,12 @@ function makeTable(columns, id){
 	var tbody = document.createElement('tbody');
 	myTable.appendChild(tbody);
 	myTable.setAttribute("id",id);
-	document.body.appendChild(myTable);
+	return myTable;
 }
 	
-function fillTable(json,columns,id){
+function fillTable(json,columns,myTable){
 	console.log("filling table");
-	var tbody = document.getElementById(id).querySelector("tbody");
+	var tbody = myTable.querySelector('tbody');
 	for (var i=0;i<json.length;i++)
 		makeRow(tbody,json[i],columns);
 }
