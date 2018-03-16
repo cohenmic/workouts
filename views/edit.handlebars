@@ -2,19 +2,19 @@
 <form id="editForm" method="post" action="/">
 	<fieldset>
 		<legend>Edit Workout:</legend>
-		<label>Name:
-			<input type="text" name="name" value="{{name}}" maxlength="20">
-		</label>
-		<label>Reps:
-			<input type="text" name="reps" value="{{reps}}" size="3" maxlength="3">
-		</label>
+		<p>
+			<label>Name:
+				<input type="text" name="name" value="{{name}}" size="20" maxlength="254">
+			</label>
+		</p>
+		<p>
+			<label>Reps:
+				<input type="number" name="reps" value="{{reps}}" min="0" max="999999999">
+			</label>
 		<label>Weight:
-			<input type="text" name="weight" value="{{weight}}" size="3" maxlength="3">
+			<input type="number" name="weight" value="{{weight}}" min="0" max="9999">
 		</label>
-		<label>Date:
-			<input type="date" name="date" value="{{date}}" size="10" maxlength="10">
-		</label>
-		<p>Weight unit:
+		Weight unit:
 			<label>pounds
 				<input type="radio" name="lbs" value="1" {{checkedlbs}}/>
 			</label>
@@ -22,9 +22,10 @@
 				<input type="radio" name="lbs" value="0" {{checkedkilos}}/>
 			</label>
 		</p>
-
+		<label>Date:
+			<input type="date" name="date" value="{{date}}" size="10" maxlength="10">
+		</label>
 		<input type="hidden" name="id" value="{{id}}">
-		
 		<button type="submit">Submit</button>
 	</fieldset>
 </form>
