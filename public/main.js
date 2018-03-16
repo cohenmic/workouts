@@ -128,15 +128,22 @@ function makeDeleteCell(id, row, tbody){
 function makeEditCell(objectIn, row, tbody){
 	var editCell = document.createElement('td');
 	editCell.className += "editCell";
+	var editForm = document.createElement('form');
+	editForm.setAttribute('method','post');
+	editForm.setAttribute('action','/edit');
+	var input = document.createElement('input');
+	input.setAttribute('type','hidden');
+	input.setAttribute('name','id');
+	input.setAttribute('value',objectIn.id);
+	editForm.appendChild(input);
 	var editButton = document.createElement('button');
-	var id = objectIn.id;
-	editButton.textContent = "edit";
-	editButton.addEventListener("click", function(e){
-		window.location.href = '/edit?id='+id;
-	});
-	editCell.appendChild(editButton);
+	editButton.setAttribute('type','submit');
+	editButton.textContent = 'edit';
+	editForm.appendChild(editButton);
+	editCell.appendChild(editForm);
 	return editCell;
-}
+}	
+
 
 	
 		
