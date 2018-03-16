@@ -45,8 +45,8 @@ app.post('/edit', function(req,res,next){
 		res.render('edit',context.results);
 	});
 });
-*/
 
+/*
 app.get('/edit', function(req,res,next){
 	var context = {};
 	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.query.id], function(err,result){
@@ -69,8 +69,11 @@ app.get('/edit', function(req,res,next){
 		res.render('edit',context.results);
 	});
 });
+*/
 
-
+/* should be able to get rid of the '/update' thing and just have app.post('./' .. since the only time we post to 
+/ is when editing something */
+/*
 app.post('/update', function(req,res,next){
 	var context = {};
 	mysql.pool.query('UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=? ',
@@ -83,6 +86,7 @@ app.post('/update', function(req,res,next){
 			res.render('home');
 		});
 });
+*/
 /*when form is edited */
 app.post('/', function(req,res,next){
 	var context = {};
