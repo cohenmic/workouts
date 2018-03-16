@@ -1,6 +1,7 @@
 
 var express=require('express');
 var mysql = require('./dbcon.js');
+var helperFunctions = require('./util.js');
 
 var app = express();
 var handlebars = require('express-handlebars').create({defaultLayout:'main'});
@@ -22,7 +23,6 @@ app.get('/', function(req,res,next){
 	res.render('home');
 });
 
-/*
 app.post('/edit', function(req,res,next){
 	var context = {};
 	mysql.pool.query('SELECT * FROM workouts WHERE id=?', [req.body.id], function(err,result){
@@ -31,11 +31,10 @@ app.post('/edit', function(req,res,next){
 			return;
 		}
 		context.results = result[0];
-		context.results['date'] = dateValidation(context.results['date'],true);
+		context.results['date'] = dateValidate(context.results['date'],true);
 		if (!context.results['weight'])
 			context.result['weight'] = "";
-		if (!context.results['reps'])
-			context.results['reps'] = "";
+		context.results['reps'] = repsValidate(context.results['reps'],true);	
 		context.results['checkedlbs'] = "";
 		context.results['checkedkilos'] = "";
 		if (context.results['lbs'] == 1) 
@@ -56,7 +55,7 @@ app.get('/edit', function(req,res,next){
 			return;
 		}
 		context.results = result[0];
-		context.results['date'] = dateValidation(context.results['date'],true);
+		context.results['date'] = (context.results['date'],true);
 		if (!context.results['weight'])
 			context.result['weight'] = "";
 		context.results['reps'] = repsValidate(context.results['reps'],true);	
@@ -108,7 +107,7 @@ app.get('/show', function(req,res,next){
 		}
 		for(var i=0;i<rows.length;i++){
 			var row=rows[i];
-			row['date'] = dateValidation(row['date'],false);
+			row['date'] = dateValidate(row['date'],false);
 			row['weight'] = poundsCalc(row['weight'],row['lbs']);
 			row['reps'] = repsValidate(row['reps'],false);
 		}  
@@ -116,37 +115,6 @@ app.get('/show', function(req,res,next){
 		res.send(context.results);
 	});
 });
-
-function dateValidation(dateIn, forForm){
-	if (dateIn != '0000-00-00'){
-		if(!forForm)
-			return dateFormat(dateIn, 'mm/dd/yyyy');
-		else
-			return dateFormat(dateIn, 'yyyy-mm-dd');
-	}
-	else
-		return 'undefined';
-}
-
-function poundsCalc(weightIn, unitIn){
-	if (!weightIn)
-		return 'undefined';
-	if (unitIn == 0) //if kilos, convert to pounds
-		return (weightIn*2.2).toFixed(0);
-	else
-		return weightIn;
-}
-
-function repsValidate(repsIn, forForm){
-	if (!repsIn){
-		if(forForm)
-			return "";
-		else
-			return "N/A";
-	}
-	else
-		return repsIn;
-}
 
 app.get('/insert', function(req,res,next){
 	var context = {};
@@ -162,7 +130,7 @@ app.get('/insert', function(req,res,next){
 					return;
 				}
 				var row=rows[0];
-				row['date'] = dateValidation(row['date'],false);
+				row['date'] = dateValidate(row['date'],false);
 				row['weight'] = poundsCalc(row['weight'],row['lbs']);
 				row['reps'] = repsValidate(row['reps'],false);
 			
@@ -217,3 +185,45 @@ app.use(function(err, req, res, next){
 app.listen(app.get('port'), function(){
   console.log('Express started on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
 });
+
+/*function dateValidate(dateIn, forForm){
+	if (dateIn != '0000-00-00'){
+		if(!forForm)
+			return dateFormat(dateIn, 'mm/dd/yyyy');
+		else
+			return dateFormat(dateIn, 'yyyy-mm-dd');
+	}
+	else
+		return 'undefined';
+}
+
+function poundsCalc(weightIn, unitIn){
+	if (!weightIn)
+		return 'undefined';
+	if (unitIn == 0) //if kilos, convert to pounds
+		return (weightIn*2.2).toFixed(0);
+	else
+		return weightIn;
+}
+
+function repsValidate(repsIn, forForm){
+	if (!repsIn){
+		if(forForm)
+			return "";
+		else
+			return "N/A";
+	}
+	else
+		return repsIn;
+} */
+/*
+function weightValidate(weightIn, forForm){
+	if (!weightIn){
+		if (forForm)
+			return "";
+		else
+			return "N/A"
+	}
+	else
+		return weightIn;
+} */
